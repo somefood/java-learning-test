@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -50,6 +52,7 @@ public class AssertJTest {
 
             // TODO: JUnit5의 assertEquals 메서드를 AssertJ의 isEqualTo 메서드로 변경해보세요.
             assertEquals(expected, actual);
+            assertThat(actual).isEqualTo(expected);
         }
 
         /**
@@ -68,6 +71,7 @@ public class AssertJTest {
 
             // TODO: JUnit5의 assertNotEquals 메서드를 AssertJ의 isNotEqualTo 메서드로 변경해보세요.
             assertNotEquals(unexpected, actual);
+            assertThat(actual).isNotEqualTo(unexpected);
         }
 
         /**
@@ -82,6 +86,7 @@ public class AssertJTest {
 
             // TODO: JUnit5의 assertNull 메서드를 AssertJ의 isNull 메서드로 변경해보세요.
             assertNull(actual);
+            assertThat(actual).isNull();
         }
 
         /**
@@ -96,6 +101,7 @@ public class AssertJTest {
 
             // TODO: JUnit5의 assertNotNull 메서드를 AssertJ의 isNotNull 메서드로 변경해보세요.
             assertNotNull(actual);
+            assertThat(actual).isNotNull();
         }
 
         /**
@@ -111,6 +117,7 @@ public class AssertJTest {
 
             // TODO: JUnit5의 assertSame 메서드를 AssertJ의 isSameAs 메서드로 변경해보세요.
             assertSame(expected, actual);
+            assertThat(actual).isSameAs(expected);
         }
 
         /**
@@ -126,6 +133,7 @@ public class AssertJTest {
 
             // TODO: JUnit5의 assertNotSame 메서드를 AssertJ의 isNotSameAs 메서드로 변경해보세요.
             assertNotSame(unexpected, actual);
+            assertThat(actual).isNotSameAs(unexpected);
         }
 
         /*
@@ -154,6 +162,8 @@ public class AssertJTest {
             assertThrows(IllegalCallerException.class, () -> {
                 causeException();
             });
+            assertThatThrownBy(this::causeException)
+                .isInstanceOf(IllegalCallerException.class);
         }
 
         /**
@@ -168,6 +178,9 @@ public class AssertJTest {
             if (!illegalCallerException.getMessage().contains("예외가 발생했습니다.")) {
                 throw new RuntimeException("예외 메시지가 다릅니다.");
             }
+            assertThatThrownBy(this::causeException)
+                .isInstanceOf(IllegalCallerException.class)
+                .hasMessage("예외가 발생했습니다.");
         }
 
         private void causeException() {
@@ -192,6 +205,8 @@ public class AssertJTest {
             assertDoesNotThrow(() -> {
                 final var number = Integer.valueOf(0x80000000);
             });
+            assertThatCode(() -> Integer.valueOf(0x80000000))
+                .doesNotThrowAnyException();
         }
     }
 
@@ -215,6 +230,7 @@ public class AssertJTest {
 
             // TODO: AssertJ의 contains 메서드를 사용하여 actual에 expected가 포함되어 있는지 비교해보세요.
             assertTrue(actual.contains(expected));
+            assertThat(actual).contains(expected);
         }
 
         /**
@@ -228,6 +244,7 @@ public class AssertJTest {
 
             // TODO: AssertJ의 startsWith 메서드를 사용하여 actual이 expected로 시작하는지 비교해보세요.
             assertTrue(actual.startsWith(expected));
+            assertThat(actual).startsWith(expected);
         }
 
         /**
@@ -240,6 +257,7 @@ public class AssertJTest {
             final var expected = "world!";
 
             // TODO: AssertJ의 기능을 활용하여 문자열이 특정 문자열로 끝나는지 비교해보세요.
+            assertThat(actual).endsWith(expected);
         }
 
         /**
@@ -252,6 +270,8 @@ public class AssertJTest {
             final var expected = "Hello, [a-z]+!";
 
             // TODO: AssertJ의 기능을 활용하여 문자열이 정규 표현식과 일치하는지 검증해보세요.
+            assertThat(actual).containsPattern(expected);
+            assertThat(actual).matches(expected);
         }
 
         /*
@@ -281,6 +301,7 @@ public class AssertJTest {
 
             // TODO: AssertJ의 기능을 활용하여 Collection의 크기를 비교해보세요.
             assertEquals(expected, actual.size());
+            assertThat(actual).hasSize(expected);
         }
 
         /**
@@ -294,6 +315,7 @@ public class AssertJTest {
 
             // TODO: AssertJ의 기능을 활용하여 Collection에 특정 객체가 포함되어 있는지 비교해보세요.
             assertTrue(actual.contains(expected));
+            assertThat(actual).contains(expected);
         }
 
         /**
@@ -309,6 +331,8 @@ public class AssertJTest {
             for (int i = 0, end = actual.size(); i < end; i++) {
                 assertEquals(expected.get(i), actual.get(i));
             }
+
+            assertThat(actual).containsExactlyElementsOf(expected);
 
             /* ----- 아래는 추가로 학습할 분만 보세요! -----
             특정 객체들이 포함되어 있는지 비교하는 방법은 굉장히 많습니다. 또한 비슷한 기능도 굉장히 많습니다.
@@ -359,6 +383,8 @@ public class AssertJTest {
                 assertEquals(expected.get(i), actual.get(i).getUsername());
             }
 
+            assertThat(actual).extracting("username").containsExactlyElementsOf(expected);
+
             /* ----- 아래는 추가로 학습할 분만 보세요! -----
             `extracting`을 사용할 경우 getter가 없어도 필드값을 추출할 수 있습니다.
             그 이유는 `extracting` 메서드가 Reflection을 사용하기 때문입니다.
@@ -396,5 +422,10 @@ public class AssertJTest {
         assertThat(actual).isNotNull();
         assertThat(actual).isInstanceOf(Object.class);
         assertThat(actual).isSameAs(expected);
+
+        assertThat(actual)
+            .isNotNull()
+            .isInstanceOf(Object.class)
+            .isSameAs(expected);
     }
 }
