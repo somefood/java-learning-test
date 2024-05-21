@@ -178,11 +178,11 @@ public class ExceptionHandlingTest {
             } catch (final SuperException e) {
                 System.out.println("예외 처리 성공");
             }
-            /* TODO: 주석을 풀고 컴파일 에러를 해결해보세요.
-             catch (final ChildException e) { // Note: 하위 클래스의 예외를 먼저 처리하지 않으면 컴파일 에러가 발생한다.
-                System.out.println("예외 처리 성공");
-            }
-             */
+            // TODO: 주석을 풀고 컴파일 에러를 해결해보세요.
+//             catch (final ChildException e) { // Note: 하위 클래스의 예외를 먼저 처리하지 않으면 컴파일 에러가 발생한다.
+//                System.out.println("예외 처리 성공");
+//            }
+
         }
 
         /**
