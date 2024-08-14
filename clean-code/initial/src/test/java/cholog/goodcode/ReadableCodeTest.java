@@ -36,21 +36,22 @@ public class ReadableCodeTest {
     void 어떻게_의도를_전달할_수_있을까() {
         // TODO: 자동차를 움직이고 위치가 변경된다는 의도를 드러낼 수 있는 코드를 작성해보세요.
         class Car {
-            private int p = 0;
+            public static final int MOVEABLE_BOUND = 5;
+            private int position = 0;
 
             void forward() {
-                if (p > 5) {
+                if (position > MOVEABLE_BOUND) {
                     throw new IllegalStateException("최대 5까지만 움직일 수 있습니다.");
                 }
 
-                p += 1;
+                position += 1;
             }
         }
 
         final var car = new Car();
 
         car.forward();
-        assertThat(car.p).isEqualTo(1);
+        assertThat(car.position).isEqualTo(1);
     }
 
     /**
@@ -184,25 +185,25 @@ public class ReadableCodeTest {
                 return name;
             }
 
-            void Forward()  {
+            void forward()  {
                 position += 1;
             }
 
-            public int position() {
+            public int getPosition() {
                 return position;
             }
 
-            void minusPosition()
+            void backward()
             {
-                position--;
+                position -= 1;
             }
         }
         // @formatter:on
 
         final var car = new Car();
 
-        car.Forward();
-        assertThat(car.position()).isEqualTo(1);
+        car.forward();
+        assertThat(car.getPosition()).isEqualTo(1);
     }
 
     /**
@@ -255,23 +256,27 @@ public class ReadableCodeTest {
                     final List<Integer> numbers,
                     final List<Integer> winningNumbers
             ) {
-                for (int number : numbers) {
-                    if (number < 1 || number > 45) {
-                        throw new IllegalArgumentException("로또 번호는 1부터 45까지의 숫자여야 합니다.");
-                    }
-                }
-                for (int winningNumber : winningNumbers) {
-                    if (winningNumber < 1 || winningNumber > 45) {
-                        throw new IllegalArgumentException("로또 번호는 1부터 45까지의 숫자여야 합니다.");
-                    }
-                }
-                if (new HashSet<>(numbers).size() != 6) {
-                    throw new IllegalArgumentException("로또 번호는 6개여야 합니다.");
-                }
-                if (new HashSet<>(winningNumbers).size() != 6) {
-                    throw new IllegalArgumentException("로또 번호는 6개여야 합니다.");
-                }
+                validateRange(numbers);
+                validateRange(winningNumbers);
+                validateSize(numbers);
+                validateSize(winningNumbers);
 
+                int count = countWinningNumber(numbers, winningNumbers);
+
+                return getPrize(count);
+            }
+
+            private int getPrize(int count) {
+                return switch (count) {
+                    case 6 -> 1_000_000_000;
+                    case 5 -> 50_000_000;
+                    case 4 -> 500_000;
+                    case 3 -> 5_000;
+                    default -> 0;
+                };
+            }
+
+            private int countWinningNumber(List<Integer> numbers, List<Integer> winningNumbers) {
                 int count = 0;
                 for (int number : numbers) {
                     for (int winningNumber : winningNumbers) {
@@ -280,14 +285,21 @@ public class ReadableCodeTest {
                         }
                     }
                 }
+                return count;
+            }
 
-                return switch (count) {
-                    case 6 -> 1_000_000_000;
-                    case 5 -> 50_000_000;
-                    case 4 -> 500_000;
-                    case 3 -> 5_000;
-                    default -> 0;
-                };
+            private void validateSize(List<Integer> numbers) {
+                if (new HashSet<>(numbers).size() != 6) {
+                    throw new IllegalArgumentException("로또 번호는 6개여야 합니다.");
+                }
+            }
+
+            private void validateRange(List<Integer> numbers) {
+                for (int number : numbers) {
+                    if (number < 1 || number > 45) {
+                        throw new IllegalArgumentException("로또 번호는 1부터 45까지의 숫자여야 합니다.");
+                    }
+                }
             }
         }
 
@@ -313,16 +325,12 @@ public class ReadableCodeTest {
     @DisplayName("어떻게 추상화하여 객체의 역할을 명확하게 드러낼 수 있을까?")
     void 어떻게_추상화하여_객체의_역할을_명확하게_드러낼_수_있을까() {
         // TODO: 역할을 적절히 추상화하여 클래스를 작게 만들어보세요. 시작점 메서드의 시그니처는 변경하지 않습니다.
-        class LottoGame {
-            int calculatePrize(
-                    final List<Integer> numbers,
-                    final List<Integer> winningNumbers
-            ) {
-                validateNumbers(numbers);
-                validateNumbers(winningNumbers);
+        class LottoNumbers {
+            final List<Integer> numbers;
 
-                final int count = countMatchNumbers(numbers, winningNumbers);
-                return calculatePrizeByCount(count);
+            public LottoNumbers(List<Integer> numbers) {
+                validateNumbers(numbers);
+                this.numbers = numbers;
             }
 
             private void validateNumbers(final List<Integer> lottoNumbers) {
@@ -341,12 +349,11 @@ public class ReadableCodeTest {
             }
 
             private int countMatchNumbers(
-                    final List<Integer> numbers,
-                    final List<Integer> winningNumbers
+                    final LottoNumbers winningNumbers
             ) {
                 int count = 0;
                 for (int number : numbers) {
-                    for (int winningNumber : winningNumbers) {
+                    for (int winningNumber : winningNumbers.numbers) {
                         if (number == winningNumber) {
                             count++;
                         }
@@ -355,6 +362,20 @@ public class ReadableCodeTest {
 
                 return count;
             }
+        }
+        
+        class LottoGame {
+            int calculatePrize(
+                    final List<Integer> numbers,
+                    final List<Integer> winningNumbers
+            ) {
+                LottoNumbers lottoNumber = new LottoNumbers(numbers);
+                LottoNumbers winningNumber = new LottoNumbers(winningNumbers);
+
+                final int count = lottoNumber.countMatchNumbers(winningNumber);
+                return calculatePrizeByCount(count);
+            }
+            
 
             private int calculatePrizeByCount(final int count) {
                 return switch (count) {
@@ -772,12 +793,7 @@ public class ReadableCodeTest {
 
             public int getPrice(final String menuName) {
                 // TODO: API에 매몰되어 과하게 사용하여 생긴 코드입니다. 간단한 코드로 리팩토링해보세요.
-                return menu.entrySet()
-                        .stream()
-                        .filter(e -> e.getKey().equals(menuName))
-                        .map(Map.Entry::getValue)
-                        .findFirst()
-                        .orElse(0);
+                return menu.getOrDefault(menuName, 0);
             }
         }
         final var menu = new Menu(Map.of(
